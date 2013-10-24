@@ -11,4 +11,7 @@ class SpoonExtension {
   /** Ignore test failures flag. */
   boolean ignoreFailures
 
+  /** Devices to run the tests on (specified with serial numbers). */
+  Set<String> devices
+
 }
