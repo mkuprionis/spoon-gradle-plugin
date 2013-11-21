@@ -46,12 +46,17 @@ class SpoonPlugin implements Plugin<Project> {
         output = new File(project.buildDir, "spoon/${variant.name}")
         debug = project.spoon.debug
         ignoreFailures = project.spoon.ignoreFailures
+        failIfNoDeviceConnected = project.spoon.failIfNoDeviceConnected
 
         if (project.spoon.className) {
           className = project.spoon.className
           if (project.spoon.methodName) {
             methodName = project.spoon.methodName
           }          
+        }
+
+        if (project.spoon.testSize) {
+          testSize = project.spoon.testSize
         }
 
         dependsOn variant.assemble, variant.testedVariant.assemble

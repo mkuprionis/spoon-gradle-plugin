@@ -1,6 +1,7 @@
 package com.stanfy.spoon.gradle
 
 import com.android.build.gradle.AppPlugin
+import com.android.ddmlib.testrunner.IRemoteAndroidTestRunner
 import com.squareup.spoon.SpoonRunner
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -32,6 +33,9 @@ class SpoonRunTask extends DefaultTask implements VerificationTask {
   /** If true then test failures do not cause a build failure. */
   boolean ignoreFailures
 
+  /** If true, tests will fail if no devices are connected. */
+  boolean failIfNoDeviceConnected
+
   /** Debug logging switcher. */
   boolean debug
 
@@ -40,6 +44,9 @@ class SpoonRunTask extends DefaultTask implements VerificationTask {
 
   /** Name of the one test method to run. */
   String methodName
+
+  /** Size of test to be run ('small' / 'medium' / 'large'). */
+  String testSize
 
   /** Instrumentation APK. */
   @InputFile
@@ -61,6 +68,7 @@ class SpoonRunTask extends DefaultTask implements VerificationTask {
     LOG.debug("Output: $output")
 
     LOG.debug("Ignore failures: $ignoreFailures")
+    LOG.debug("Fail if no device connected: $failIfNoDeviceConnected")
     LOG.debug("Debug mode: $debug")
 
     if (className) {
@@ -70,17 +78,29 @@ class SpoonRunTask extends DefaultTask implements VerificationTask {
       }
     }
 
+    if (testSize) {
+      LOG.debug("Test size: $testSize")       
+    }
+
     String cp = getClasspath()
     LOG.debug("Classpath: $cp")
+
+    IRemoteAndroidTestRunner.TestSize testSizeProper;
+    if(testSize) {
+      // Will throw exception with informative message if provided size is illegal
+      testSizeProper = IRemoteAndroidTestRunner.TestSize.getTestSize(testSize)
+    }
 
     boolean success = new SpoonRunner.Builder()
       .setTitle(title)
       .setApplicationApk(applicationApk)
       .setInstrumentationApk(instrumentationApk)
       .setOutputDirectory(output)
+      .setFailIfNoDeviceConnected(failIfNoDeviceConnected)
       .setDebug(debug)
       .setClassName(className)
       .setMethodName(methodName)
+      .setTestSize(testSizeProper)
       .setAndroidSdk(project.plugins.findPlugin(AppPlugin).sdkDirectory)
       .setClasspath(cp)
       .useAllAttachedDevices()
